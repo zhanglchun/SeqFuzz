@@ -70,6 +70,10 @@ def PrepareForFuzzing(caseIdx, recommend_syscalls):
             Config.logging.info(f"[case {caseIdx} xidx {xidx}] No customized fuzzer")
     
         outList = []
+        if xidx not in all_calls:
+            Config.logging.error(f"[case {caseIdx} xidx {xidx}] Key {xidx} not found in all_calls. Available keys: {all_calls.keys()}")
+            # 处理错误，例如跳过当前xidx或引发自定义异常
+            continue  # 跳过当前循环迭代
         targetCalls = all_calls[xidx]
         orginTargetCalls = targetCalls
         

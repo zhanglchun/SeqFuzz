@@ -30,7 +30,7 @@ def Check(func,fail_str):
     assert len(fail_cases)==0, f"{fail_str}\n Fail cases: {','.join(fail_cases)}"
     
 def LoadDatapoints():
-    res = pd.read_excel(DatasetFile)
+    res = pd.read_csv(DatasetFile)
     header = res.columns
     global datapoints
     datapoints=[dict(zip(header,i)) for i in res.values]
@@ -165,8 +165,8 @@ def PreparePathVariables():
     
     ############### SET BY USER
     global CleanImageTemplatePath,KeyPath
-    CleanImageTemplatePath=""
-    KeyPath=""
+    CleanImageTemplatePath="/home/zl/source/image/bullseye.img"
+    KeyPath="/home/zl/source/image/bullseye.id_rsa"
     assert os.path.exists(CleanImageTemplatePath), "Please offer clean image path"
     assert os.path.exists(KeyPath), "Please offer key path"
     
@@ -189,7 +189,7 @@ def PrepareArgParser():
     parser=argparse.ArgumentParser(description='This is the runner script for Syzdirect.')
     parser.add_argument('actions',type=Actions, nargs='+', metavar="/".join([a.value for a in Actions]),help='actions to be chose from')
     parser.add_argument('-WorkdirPrefix',default='./workdir',help='working directory root, default set to cwd/workdir',required=False)
-    parser.add_argument('-dataset',type=str, default="dataset.xlsx",help='input dataset for datapoints, default set to ${WorkdirPrefix}/dataset.xlsx',dest="dataset_file")
+    parser.add_argument('-dataset',type=str, default="dataset.csv",help='input dataset for datapoints, default set to ${WorkdirPrefix}/dataset.csv',dest="dataset_file")
     parser.add_argument('-j',type=int,default=1,help="core num to use during compilation")
     parser.add_argument('-fuzz-rounds',type=int,default=10,help="run rounds for every case",dest="run_rounds")
     parser.add_argument('-uptime',type=int,default=24,help="fuzzing timeout(hours) for every case, default set to 24 ")
@@ -199,7 +199,7 @@ def PrepareArgParser():
     
     arg=parser.parse_args()
     DatasetFile=arg.dataset_file
-    assert os.path.exists(DatasetFile) and os.path.splitext(DatasetFile)[1] == ".xlsx", "dataset file (default set to ${WorkdirPrefix}/dataset.xlsx) not exists or it's not ended with .xlsx"
+    assert os.path.exists(DatasetFile) and os.path.splitext(DatasetFile)[1] == ".csv", "dataset file (default set to ${WorkdirPrefix}/dataset.csv) not exists or it's not ended with .csv"
     WorkdirPrefix=arg.WorkdirPrefix
     PreparePathVariables()
     CPUNum=arg.j
@@ -228,16 +228,18 @@ def PrepareBinary():
     assert os.path.exists(ClangPath), "Fails to build customized llvm(clang)"
         
     ### function_model
-    logging.info("Building tool for function modeling")
-    build_function_model_cmd=f'cd {FunctionModelDirRoot} && make clean && make LLVM_BUILD={LLVMBuildDir}'
-    # print(ExecuteCMD(build_function_model_cmd)[0])
-    ExecuteBigCMD(build_function_model_cmd)
+    if not os.path.exists(FunctionModelBinary):
+	    logging.info("Building tool for function modeling")
+	    build_function_model_cmd=f'cd {FunctionModelDirRoot} && make clean && make LLVM_BUILD={LLVMBuildDir}'
+	    # print(ExecuteCMD(build_function_model_cmd)[0])
+	    ExecuteBigCMD(build_function_model_cmd)
     assert os.path.exists(FunctionModelBinary), "Fails to build function modeling tool"
     
     ### kernel_analysis
-    logging.info("Building tool for entry extract and distance calculation")
-    build_kernel_analysis_cmd=f"cd {TargetPointAnalysisDirRoot} && make clean && make LLVM_BUILD={LLVMBuildDir}"
-    ExecuteBigCMD(build_kernel_analysis_cmd)
+    if not os.path.exists(TargetPointAnalysisBinary):
+	    logging.info("Building tool for entry extract and distance calculation")
+	    build_kernel_analysis_cmd=f"cd {TargetPointAnalysisDirRoot} && make clean && make LLVM_BUILD={LLVMBuildDir}"
+	    ExecuteBigCMD(build_kernel_analysis_cmd)
     assert os.path.exists(TargetPointAnalysisBinary), "Fails to build tool for entry extract and distance calculation"
     
     ### Fuzzer

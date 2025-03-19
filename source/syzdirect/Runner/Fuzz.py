@@ -23,7 +23,7 @@ def MultirunFuzzer():
 
         # first build it again
         syzdirect_path = Config.FuzzerDir
-        os.system(f"cd {syzdirect_path}; make")
+#        os.system(f"cd {syzdirect_path}; make")
 
         # collect all xidxs
         tfmap=Config.ParseTargetFunctionsInfoFile(caseIdx)

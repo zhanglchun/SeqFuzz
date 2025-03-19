@@ -12,6 +12,7 @@ def PrepareSourceCode():
                 shutil.copytree(Config.LinuxSrcTemplate,caseSrcDir)
             else:
                 clonecmd=f'cd {Config.SrcDirRoot} && git clone https://github.com/torvalds/linux.git case_{caseIdx}'
+                # clonecmd=f'cd {Config.SrcDirRoot} && cp -r /home/zl/linux-stable case_{caseIdx}'
                 Config.ExecuteCMD(clonecmd)
         assert os.path.exists(caseSrcDir)
         
@@ -72,6 +73,7 @@ exec $CLANG "$@"
         Config.PrepareDir(caseBCDir)
         
         cpcmd=f"cp {configPath} {os.path.join(caseBCDir, '.config')}"
+        Config.logging.info(f"cp configpath to bcs/.config")
         Config.ExecuteCMD(cpcmd)
         
         DisabledConfigs=[
@@ -82,10 +84,20 @@ exec $CLANG "$@"
             f.writelines("\nCONFIG_KCOV=y\n")
 
         
-        
-        compile_command = f"cd {Config.getSrcDirByCase(caseIdx)} && git checkout -- scripts/Makefile.kcov && make clean && make mrproper && yes | make CC={Config.EmitScriptPath} O={caseBCDir} oldconfig && make CC=\'{Config.EmitScriptPath}\' O={caseBCDir} -j{Config.CPUNum}"
+        # compile_command = f"cd {Config.getSrcDirByCase(caseIdx)} && git checkout -- scripts/Makefile.kcov && make clean && make mrproper && yes | make CFLAGS='-Wall -Wno-error' EXTRA_CFLAGS='-Wall -Wno-error' CC={Config.EmitScriptPath} O={caseBCDir} oldconfig && make CFLAGS='-Wall -Wno-error ' EXTRA_CFLAGS='-Wall -Wno-error ' CC=\'{Config.EmitScriptPath}\' O={caseBCDir} -j{Config.CPUNum}"
+        # compile_command = f"cd {Config.getSrcDirByCase(caseIdx)} && git checkout -- scripts/Makefile.kcov && make clean && make mrproper && yes | make CC={Config.EmitScriptPath} O={caseBCDir} oldconfig && make CC=\'{Config.EmitScriptPath}\' O={caseBCDir} -j{Config.CPUNum}"
+        compile_command = f"""
+cd {Config.getSrcDirByCase(caseIdx)} && 
+git checkout -- scripts/Makefile.kcov && 
+make -s clean && 
+make -s mrproper && 
+make CFLAGS='-Wall -Wno-error' EXTRA_CFLAGS='-Wall -Wno-error' CC={Config.EmitScriptPath} O={caseBCDir} olddefconfig && 
+make CFLAGS='-Wall -Wno-error ' EXTRA_CFLAGS='-Wall -Wno-error ' CC=\'{Config.EmitScriptPath}\' O={caseBCDir} -j{Config.CPUNum}
+"""
         # print(Config.ExecuteCMD(compile_command))
         os.system(compile_command)
+        Config.logging.info(f"cd bcs/{caseIdx})git checkout -- scripts/Makefile.kcov && make clean...")
+        
         if IsCompilationSuccessfulByCase(caseBCDir):
             Config.logging.info(f"[case {caseIdx}] Successfully compiled bitcode")
         else:
@@ -152,11 +164,6 @@ make ARCH=x86_64 CC=$CC O=%s -j%s
             shutil.rmtree(tempBuildDir)
             Config.logging.info(f"[case {caseIdx} xidx {xidx}] Instrument kernel with distance succeed!")
             
-            
-            
-    
-    
-    
 
 def IsCompilationSuccessfulByCase(caseBCDir):
     bc_bzImage_path = os.path.join(caseBCDir, "arch/x86/boot/bzImage")
