@@ -81,6 +81,8 @@ For every case with `idx`, multiple intrumentation points with distinctive `xidx
 - `repro bug title`: If not left blank, the fuzzer would stop as soon as the kernel crashes with the same title
 - `recommend syscall`: If not left blank, Syzdirect would takes it into account during entry extraction for better improvement. Note that the recommend syscall *should not* include `$`
 - `config path`: If not left blank, compile the kernel using the config in the path specified. Default set to the [bigconfig given](syzdirect/bigconfig).
+### set LLVM_DIR Path
+export LLVM_DIR=/path_to/2SyzDirect/source/llvm-project-new/build
 
 ### General usage of runner scripts
 
