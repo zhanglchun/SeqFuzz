@@ -61,10 +61,11 @@ def MultirunFuzzer():
                 config = copy.deepcopy(template_config)
 
                 shutil.rmtree(subWorkDir, ignore_errors=True)
+                port = caseIdx*10+runCount
 
                 config["image"] = CLEAN_IMAGE_PATH
                 config["workdir"] = subWorkDir
-                config["http"] = f"0.0.0.0:{2345+runCount}"
+                config["http"] = f"0.0.0.0:{2345+port}"
                 config['vm']['kernel'] = kernelImage
                 config['syzkaller'] = syzkaller_path
                 config['hitindex']=int(xidx)
