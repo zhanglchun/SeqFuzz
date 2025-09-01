@@ -8,7 +8,7 @@ You can find a guide about how to build&run SyzDirect [here](./source/README.md)
 
 ## Dataset
 The dataset is located in the [dataset](./dataset) directory.
-This dataset contains 100 known bugs and patches used in our evaluation.
+This dataset contains 30 known bugs in our evaluation.
 
 
 ```
