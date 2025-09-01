@@ -1,4 +1,4 @@
-# Syzdirect
+# --
 
 ## Directory structure
 
@@ -12,6 +12,7 @@
     ├── Runner		// Runner scripts
     ├── syzdirect_function_model
     ├── syzdirect_fuzzer
+    ├── syzdirect_fuzzer_sp
     ├── syzdirect_kernel_analysis
     └── template_config		// template fuzzing config
 ```
