@@ -4,7 +4,7 @@ More details will be added in the future.
 
 ## Source Code & Usage
 The source code are located in the [source](./source) directory.
-You can find a guide about how to build&run SyzDirect [here](./source/README.md).
+You can find a guide about how to build&run SeqFuzz [here](./source/README.md).
 
 ## Dataset
 The dataset is located in the [dataset](./dataset) directory.
